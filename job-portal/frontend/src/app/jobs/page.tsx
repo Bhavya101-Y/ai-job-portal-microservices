@@ -3,7 +3,7 @@ import { Job } from "@/type";
 import React, { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { job_service } from "@/context/AppContext";
+import { job_service } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Briefcase, Filter, MapPin, Search, X } from "lucide-react";
 import Loading from "@/components/loading";

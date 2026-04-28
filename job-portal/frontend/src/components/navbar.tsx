@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { Briefcase, Home, Info, LogOut, Menu, User, X } from "lucide-react";
+import { Bell, Briefcase, Building2, Home, Info, LogOut, Menu, User, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModeToggle } from "./mode-toggle";
@@ -11,7 +11,7 @@ import { useAppData } from "@/context/AppContext";
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { isAuth, user, setIsAuth, setUser, loading, logoutUser } =
+  const { isAuth, user, setIsAuth, setUser, loading, logoutUser, notifications, markAsRead } =
     useAppData();
 
   const toggleMenu = () => {
@@ -64,10 +64,59 @@ const NavBar = () => {
                 <Info size={16} /> About
               </Button>
             </Link>
+            {user?.role === "recruiter" && (
+              <Link href={"/account"}>
+                <Button
+                  variant={"ghost"}
+                  className="flex items-center gap-2 font-medium text-blue-600"
+                >
+                  <Building2 size={16} /> My Companies
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Right side Actions */}
           <div className="hidden md:flex items-center gap-3">
+            {isAuth && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell size={20} />
+                    {notifications.filter(n => !n.is_read).length > 0 && (
+                      <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
+                        {notifications.filter(n => !n.is_read).length}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold">Notifications</h3>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div
+                          key={n.notification_id}
+                          className={`p-4 border-b hover:bg-muted/50 transition-colors cursor-pointer ${!n.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                          onClick={() => !n.is_read && markAsRead(n.notification_id)}
+                        >
+                          <p className="text-sm">{n.message}</p>
+                          <p className="text-[10px] opacity-60 mt-1">
+                            {new Date(n.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center text-sm opacity-60">
+                        No notifications yet
+                      </div>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
             {loading ? (
               ""
             ) : (
@@ -179,6 +228,17 @@ const NavBar = () => {
               <Info size={18} /> About
             </Button>
           </Link>
+
+          {user?.role === "recruiter" && (
+            <Link href={"/account"} onClick={toggleMenu}>
+              <Button
+                variant={"ghost"}
+                className="w-full justify-start gap-3 h-11 text-blue-600"
+              >
+                <Building2 size={18} /> My Companies
+              </Button>
+            </Link>
+          )}
 
           {isAuth ? (
             <>

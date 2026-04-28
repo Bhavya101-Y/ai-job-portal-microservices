@@ -86,6 +86,9 @@ export interface AppContextType {
   applyJob: (job_id: number) => Promise<void>;
   applications: Application[];
   fetchApplications: () => Promise<void>;
+  notifications: Notification[];
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (id: number) => Promise<void>;
 }
 
 export interface AppProviderProps {
@@ -142,3 +145,12 @@ export interface Application {
   job_salary: number;
   job_location: string;
 }
+
+export interface Notification {
+  notification_id: number;
+  user_id: number;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+

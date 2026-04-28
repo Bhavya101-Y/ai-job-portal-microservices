@@ -50,13 +50,22 @@ export const createCompany = TryCatch(
       throw new ErrorHandler(500, "Failed to create file buffer");
     }
 
-    const { data } = await axios.post(
-      `${process.env.UPLOAD_SERVICE}/api/utils/upload`,
-      { buffer: fileBuffer.content }
-    );
+    let uploadResult;
+    try {
+      const { data } = await axios.post(
+        `${process.env.UPLOAD_SERVICE}/api/utils/upload`,
+        { buffer: fileBuffer.content }
+      );
+      uploadResult = data;
+    } catch (error: any) {
+      throw new ErrorHandler(
+        error?.response?.status || 500,
+        error?.response?.data?.message || "Logo upload failed. Please ensure Utils Service is running."
+      );
+    }
 
     const [newCompany] =
-      await sql`INSERT INTO companies (name, description, website, logo, logo_public_id, recruiter_id) VALUES (${name}, ${description}, ${website}, ${data.url}, ${data.public_id}, ${req.user?.user_id}) RETURNING *`;
+      await sql`INSERT INTO companies (name, description, website, logo, logo_public_id, recruiter_id) VALUES (${name}, ${description}, ${website}, ${uploadResult.url}, ${uploadResult.public_id}, ${user.user_id}) RETURNING *`;
 
     res.json({
       message: "Company created successfully",
@@ -200,6 +209,24 @@ export const getAllCompany = TryCatch(
   }
 );
 
+export const getMyJobs = TryCatch(async (req: AuthenticatedRequest, res) => {
+  const user = req.user;
+
+  if (!user) {
+    throw new ErrorHandler(401, "Authentication required");
+  }
+
+  const jobs = await sql`
+    SELECT j.*, c.name AS company_name, c.logo AS company_logo 
+    FROM jobs j 
+    JOIN companies c ON j.company_id = c.company_id 
+    WHERE j.posted_by_recuriter_id = ${user.user_id} 
+    ORDER BY j.created_at DESC
+  `;
+
+  res.json(jobs);
+});
+
 export const getCompanyDetails = TryCatch(
   async (req: AuthenticatedRequest, res) => {
     const { id } = req.params;
@@ -327,13 +354,21 @@ export const updateApplication = TryCatch(
       throw new ErrorHandler(403, "Forbidden you are not allowed");
     }
 
+    const { status, message: recruiterMessage } = req.body;
+
     const [updatedApplication] =
-      await sql`UPDATE applications SET status = ${req.body.status} WHERE application_id = ${id} RETURNING *`;
+      await sql`UPDATE applications SET status = ${status}, message = ${recruiterMessage} WHERE application_id = ${id} RETURNING *`;
+
+    const notificationMessage = `Your application for "${job.title}" has been updated to: ${status}`;
+    console.log(`📡 Inserting notification for User ID: ${application.applicant_id}, Message: ${notificationMessage}`);
+    
+    await sql`INSERT INTO notifications (user_id, message) VALUES (${application.applicant_id}, ${notificationMessage})`;
+    console.log(`✅ Notification successfully inserted in DB for user ${application.applicant_id}`);
 
     const message = {
       to: application.applicant_email,
-      subject: "Application Update - Job portal",
-      html: applicationStatusUpdateTemplate(job.title),
+      subject: `Job Application Update: ${status} - HireHeaven`,
+      html: applicationStatusUpdateTemplate(job.title, status, recruiterMessage),
     };
 
     publishToTopic("send-mail", message).catch((error) => {
@@ -347,3 +382,15 @@ export const updateApplication = TryCatch(
     });
   }
 );
+
+export const getStats = TryCatch(async (req, res) => {
+  const [jobCount] = await sql`SELECT COUNT(*) FROM jobs WHERE is_active = true`;
+  const [companyCount] = await sql`SELECT COUNT(*) FROM companies`;
+  const [userCount] = await sql`SELECT COUNT(*) FROM users WHERE role = 'jobseeker'`;
+
+  res.json({
+    activeJobs: jobCount.count,
+    companies: companyCount.count,
+    jobSeekers: userCount.count,
+  });
+});

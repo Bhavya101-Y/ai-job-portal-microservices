@@ -1,5 +1,5 @@
 "use client";
-import { user_service } from "@/context/AppContext";
+import { user_service } from "@/lib/constants";
 import { User } from "@/type";
 import axios from "axios";
 import { useParams } from "next/navigation";

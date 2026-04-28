@@ -7,6 +7,7 @@ import {
   Clock,
   DollarSign,
   Eye,
+  MessageSquare,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,13 @@ const AppliedJobs: React.FC<AppliedJobsProps> = ({ applications }) => {
           color: "text-red-600 dark:bg-red-900/30",
           bg: "bg-red-100 dark:bg-red-900/30",
           border: "border-red-200 dark:border-red-800",
+        };
+      case "interview":
+        return {
+          icon: MessageSquare,
+          color: "text-blue-600 dark:bg-blue-900/30",
+          bg: "bg-blue-100 dark:bg-blue-900/30",
+          border: "border-blue-200 dark:border-blue-800",
         };
       default:
         return {
@@ -99,6 +107,17 @@ const AppliedJobs: React.FC<AppliedJobsProps> = ({ applications }) => {
                             </span>
                           </div>
                         </div>
+
+                        {a.message && (
+                          <div className="mt-4 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500">
+                            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">
+                              Message from Recruiter:
+                            </p>
+                            <p className="text-sm opacity-80 italic">
+                              "{a.message}"
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <Link

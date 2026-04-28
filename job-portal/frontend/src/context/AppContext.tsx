@@ -5,12 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Cookies from "js-cookie";
 import axios from "axios";
-
-export const utils_service = "http://35.154.186.96:5001";
-export const auth_service = "http://35.154.186.96:5000";
-export const user_service = "http://35.154.186.96:5002";
-export const job_service = "http://35.154.186.96:5003";
-export const payment_service = "http://35.154.186.96:5004";
+import { auth_service, job_service, payment_service, user_service, utils_service } from "@/lib/constants";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -20,7 +15,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
 
-  const token = Cookies.get("token");
+const token = Cookies.get("token") || "";
 
   async function fetchUser() {
     try {
@@ -28,6 +23,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        
       });
 
       setUser(data);
@@ -56,7 +52,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       toast.success(data.message);
       fetchUser();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to update profile picture");
     } finally {
       setLoading(false);
     }
@@ -78,7 +74,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       toast.success(data.message);
       fetchUser();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to update resume");
     } finally {
       setLoading(false);
     }
@@ -99,7 +95,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       toast.success(data.message);
       fetchUser();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to update profile");
     } finally {
       setBtnLoading(false);
     }
@@ -131,7 +127,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setSkill("");
       fetchUser();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to add skill");
     } finally {
       setBtnLoading(false);
     }
@@ -151,7 +147,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       toast.success(data.message);
       fetchUser();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to remove skill");
     }
   }
 
@@ -169,9 +165,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       );
 
       toast.success(data.message);
-      fetchApplications();
+      await fetchApplications();
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to apply for job");
     } finally {
       setBtnLoading(false);
     }
@@ -196,11 +192,56 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }
 
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+ 
+  async function fetchNotifications() {
+    try {
+      const { data } = await axios.get(
+        `${user_service}/api/user/notification/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+ 
+      console.log("Notifications fetched:", data);
+      setNotifications(data);
+    } catch (error) {
+      console.log("Error fetching notifications:", error);
+    }
+  }
+ 
+  async function markAsRead(id: number) {
+    try {
+      const { data } = await axios.put(
+        `${user_service}/api/user/notification/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+ 
+      toast.success(data.message);
+      fetchNotifications();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to mark as read"
+      );
+    }
+  }
+ 
   useEffect(() => {
     fetchUser();
     fetchApplications();
-  }, []);
+    fetchNotifications();
 
+    const interval = setInterval(fetchNotifications, 5000); // Poll every 5s
+    return () => clearInterval(interval);
+  }, []);
+ 
   return (
     <AppContext.Provider
       value={{
@@ -220,10 +261,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         applyJob,
         applications,
         fetchApplications,
+        notifications,
+        fetchNotifications,
+        markAsRead,
       }}
     >
       {children}
-      <Toaster />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          duration: 2000,
+        }}
+      />
     </AppContext.Provider>
   );
 };
@@ -235,3 +284,5 @@ export const useAppData = (): AppContextType => {
   }
   return context;
 };
+
+

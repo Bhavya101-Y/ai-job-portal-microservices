@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { payment_service, useAppData } from "@/context/AppContext";
+import { useAppData } from "@/context/AppContext";
+import { payment_service } from "@/lib/constants";
 import toast from "react-hot-toast";
 import Loading from "@/components/loading";
 import { Card } from "@/components/ui/card";
@@ -63,7 +64,7 @@ const SubscriptionPage = () => {
           setLoading(false);
         } catch (error: any) {
           setLoading(false);
-          toast.error(error.response.data.message);
+          toast.error(error?.response?.data?.message || "Payment verification failed");
         }
       },
       theme: {

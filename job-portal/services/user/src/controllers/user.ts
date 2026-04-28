@@ -272,7 +272,7 @@ export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   try {
     [newApplication] =
-      await sql`INSERT INTO applications (job_id, applicant_id, applicant_email, resume, subscribed) VALUES (${job_id}, ${applicant_id}, ${user?.email}, ${resume}, ${isSubscribed})`;
+      await sql`INSERT INTO applications (job_id, applicant_id, applicant_email, resume, subscribed) VALUES (${job_id}, ${applicant_id}, ${user?.email}, ${resume}, ${isSubscribed}) RETURNING *`;
   } catch (error: any) {
     if (error.code === "23505") {
       throw new ErrorHandler(409, "you have already applied to this job.");
@@ -280,18 +280,47 @@ export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
     throw error;
   }
 
+  console.log(`User ${applicant_id} applying for job ${job_id}`);
+
   res.json({
     message: "Applied for job successfully",
     application: newApplication,
   });
 });
 
-export const getAllaplications = TryCatch(
+export const getAllApplications = TryCatch(
   async (req: AuthenticatedRequest, res) => {
     const applications = await sql`
     SELECT a.*, j.title AS job_title, j.salary AS job_salary, j.location AS job_location FROM applications a JOIN jobs j ON a.job_id = j.job_id WHERE a.applicant_id = ${req.user?.user_id}
   `;
 
+    console.log(`Fetched ${applications.length} applications for user ${req.user?.user_id}`);
+
     res.json(applications);
+  }
+);
+
+export const getNotifications = TryCatch(
+  async (req: AuthenticatedRequest, res) => {
+    console.log(`🔍 User ${req.user?.user_id} fetching notifications...`);
+    const notifications = await sql`
+      SELECT * FROM notifications WHERE user_id = ${req.user?.user_id} ORDER BY created_at DESC
+    `;
+
+    console.log(`✅ Found ${notifications.length} notifications for user ${req.user?.user_id}`);
+
+    res.json(notifications);
+  }
+);
+
+export const markNotificationAsRead = TryCatch(
+  async (req: AuthenticatedRequest, res) => {
+    const { id } = req.params;
+
+    await sql`UPDATE notifications SET is_read = true WHERE notification_id = ${id} AND user_id = ${req.user?.user_id}`;
+
+    res.json({
+      message: "Notification marked as read",
+    });
   }
 );

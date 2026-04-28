@@ -1,8 +1,10 @@
 "use client";
 import Loading from "@/components/loading";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { job_service, useAppData } from "@/context/AppContext";
+import { useAppData } from "@/context/AppContext";
+import { job_service } from "@/lib/constants";
 import { Application, Job } from "@/type";
 import axios from "axios";
 import {
@@ -22,8 +24,9 @@ import Link from "next/link";
 
 const JobPage = () => {
   const { id } = useParams();
-  const { user, isAuth, applyJob, applications, btnLoading } = useAppData();
   const router = useRouter();
+
+  const { user, isAuth, applyJob, applications, btnLoading } = useAppData();
 
   const [job, setJob] = useState<Job | null>(null);
 
@@ -31,9 +34,10 @@ const JobPage = () => {
 
   useEffect(() => {
     if (applications && id) {
-      applications.forEach((item: any) => {
-        if (item.job_id.toString() === id) setApplied(true);
-      });
+      const isAlreadyApplied = applications.some(
+        (item: any) => item.job_id.toString() === id.toString()
+      );
+      setApplied(isAlreadyApplied);
     }
   }, [applications, id]);
 
@@ -93,6 +97,8 @@ const JobPage = () => {
       : jobApplications.filter((app) => app.status === filterStatus);
 
   const [value, setValue] = useState("");
+  const [recruiterMessage, setRecruiterMessage] = useState("");
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   const updateApplicationHandler = async (id: number) => {
     if (value === "") return toast.error("Please give valid value");
@@ -100,7 +106,7 @@ const JobPage = () => {
     try {
       const { data } = await axios.put(
         `${job_service}/api/job/application/update/${id}`,
-        { status: value },
+        { status: value, message: recruiterMessage },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -110,8 +116,11 @@ const JobPage = () => {
 
       toast.success(data.message);
       fetchJobApplications();
+      setUpdatingId(null);
+      setRecruiterMessage("");
+      setValue("");
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to update application status");
     }
   };
   return (
@@ -280,6 +289,8 @@ const JobPage = () => {
                             ? "bg-green-100 dark:bg-green-900/30 text-green-600"
                             : e.status === "Rejected"
                             ? "bg-red-100 dark:bg-red-900/30 text-red-600"
+                            : e.status === "Interview"
+                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600"
                             : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600"
                         }`}
                       >
@@ -306,25 +317,47 @@ const JobPage = () => {
                     </div>
 
                     {/* update Status */}
-                    <div className="flex gap-2 pt-3 border-t">
-                      <select
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        className="flex-1 p-2 border-2 border-gray-300 rounded-md bg-background"
-                      >
-                        <option value="">Update status</option>
-                        <option value="Submitted">Submitted</option>
-                        <option value="Hired">Hired</option>
-                        <option value="Rejected">Rejected</option>
-                      </select>
-                      <Button
-                        disabled={btnLoading}
-                        onClick={() =>
-                          updateApplicationHandler(e.application_id)
-                        }
-                      >
-                        Update
-                      </Button>
+                    <div className="flex flex-col gap-3 pt-3 border-t">
+                      <div className="flex gap-2">
+                        <select
+                          value={updatingId === e.application_id ? value : ""}
+                          onChange={(ev) => {
+                            setUpdatingId(e.application_id);
+                            setValue(ev.target.value);
+                            // Set default message for Interview
+                            if (ev.target.value === "Interview") {
+                              setRecruiterMessage(`Hi, we liked your profile and would like to invite you for an interview for the ${job?.title} position. Please let us know your availability.`);
+                            }
+                          }}
+                          className="flex-1 p-2 border-2 border-gray-300 rounded-md bg-background"
+                        >
+                          <option value="">Update status</option>
+                          <option value="Submitted">Submitted</option>
+                          <option value="Interview">Interview Call</option>
+                          <option value="Hired">Hired</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+
+                        <Button
+                          onClick={() => updateApplicationHandler(e.application_id)}
+                          disabled={updatingId !== e.application_id || value === ""}
+                          size={"sm"}
+                        >
+                          Update
+                        </Button>
+                      </div>
+
+                      {updatingId === e.application_id && value !== "" && (
+                        <div className="space-y-2 animate-in fade-in duration-300">
+                          <Label className="text-xs font-medium">Custom Message (Optional)</Label>
+                          <textarea
+                            value={recruiterMessage}
+                            onChange={(ev) => setRecruiterMessage(ev.target.value)}
+                            placeholder="Type a message to the candidate..."
+                            className="w-full p-2 text-sm border-2 border-gray-300 rounded-md bg-background min-h-[80px]"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

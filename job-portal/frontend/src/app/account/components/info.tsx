@@ -31,6 +31,14 @@ import { useRouter } from "next/navigation";
 import React, { ChangeEvent, useRef, useState } from "react";
 
 const Info: React.FC<AccontProps> = ({ user, isYourAccount }) => {
+  const getRawUrl = (url: string) => {
+    if (!url) return "";
+    if (url.includes("cloudinary.com") && url.includes("/image/upload/")) {
+      return url.replace("/image/upload/", "/raw/upload/");
+    }
+    return url;
+  };
+
   const inputRef = useRef<HTMLInputElement | null>(null);
   const editRef = useRef<HTMLButtonElement | null>(null);
   const resumeRef = useRef<HTMLInputElement | null>(null);
@@ -206,7 +214,7 @@ const Info: React.FC<AccontProps> = ({ user, isYourAccount }) => {
                 <div className="flex-1">
                   <p className="text-sm font-medium">Resume Document</p>
                   <Link
-                    href={user.resume}
+                    href={getRawUrl(user.resume)}
                     className="text-sm text-blue-500 hover:underline"
                     target="_blank"
                   >

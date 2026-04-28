@@ -12,8 +12,10 @@ export const connectKafka = async () => {
       brokers: [process.env.Kafka_Broker || "localhost:9092"],
     });
 
+    console.log("⏳ Connecting to Kafka at:", process.env.Kafka_Broker || "localhost:9092");
     admin = kafka.admin();
     await admin.connect();
+    console.log("✅ Admin connected to Kafka");
 
     const topics = await admin.listTopics();
 
@@ -36,9 +38,9 @@ export const connectKafka = async () => {
 
     await producer.connect();
 
-    console.log("✅ connected to kafka producer");
+    console.log("✅ Kafka Producer connected successfully");
   } catch (error) {
-    console.log("Failed to connect to kafka", error);
+    console.error("❌ Failed to connect to Kafka:", error);
   }
 };
 

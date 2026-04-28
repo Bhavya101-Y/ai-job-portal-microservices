@@ -1,5 +1,6 @@
 "use client";
-import { auth_service, useAppData } from "@/context/AppContext";
+import { useAppData } from "@/context/AppContext";
+import { auth_service } from "@/lib/constants";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import React, { FormEvent, useState } from "react";
@@ -22,11 +23,14 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
 
-  const { isAuth, setUser, loading, setIsAuth } = useAppData();
+  const { isAuth, user, setUser, loading, setIsAuth } = useAppData();
 
   if (loading) return <Loading />;
 
-  if (isAuth) return redirect("/");
+  if (isAuth) {
+    if (user?.role === "recruiter") return redirect("/account");
+    return redirect("/");
+  }
 
   const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,7 +66,8 @@ const RegisterPage = () => {
       setUser(data.registeredUser);
       setIsAuth(true);
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      const message = error?.response?.data?.message || error?.message || "Registration failed. Please try again.";
+      toast.error(message);
       setIsAuth(false);
     } finally {
       setBtnLoading(false);

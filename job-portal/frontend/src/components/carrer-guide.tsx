@@ -24,7 +24,7 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { utils_service } from "@/context/AppContext";
+import { utils_service } from "@/lib/constants";
 import toast from "react-hot-toast";
 
 const CarrerGuide = () => {
@@ -65,7 +65,7 @@ const CarrerGuide = () => {
       setResponse(data);
       toast.success("Carrer guidence generated");
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to generate career guidance");
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,8 @@
 import { useParams } from "next/navigation";
 import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from "react";
-import { job_service, useAppData } from "@/context/AppContext";
+import { useAppData } from "@/context/AppContext";
+import { job_service } from "@/lib/constants";
 import { Company, Job } from "@/type";
 import axios from "axios";
 import Loading from "@/components/loading";

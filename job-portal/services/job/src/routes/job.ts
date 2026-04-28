@@ -9,19 +9,23 @@ import {
   getAllApplicationForJob,
   getAllCompany,
   getCompanyDetails,
+  getMyJobs,
   getSingleJob,
+  getStats,
   updateApplication,
   updateJob,
 } from "../controllers/job.js";
 
 const router = express.Router();
 
+router.get("/stats", getStats);
 router.post("/company/new", isAuth, uploadFile, createCompany);
 router.delete("/company/:companyId", isAuth, deleteCompany);
 router.post("/new", isAuth, createJob);
 router.put("/:jobId", isAuth, updateJob);
 router.get("/company/all", isAuth, getAllCompany);
 router.get("/company/:id", getCompanyDetails);
+router.get("/myjobs", isAuth, getMyJobs);
 router.get("/all", getAllActiveJobs);
 router.get("/:jobId", getSingleJob);
 router.get("/application/:jobId", isAuth, getAllApplicationForJob);

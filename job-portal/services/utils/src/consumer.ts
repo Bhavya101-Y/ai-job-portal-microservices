@@ -28,30 +28,33 @@ export const startSendMailConsumer = async () => {
             message.value?.toString() || "{}"
           );
 
+          if (process.env.SMTP_USER === "example@gmail.com") {
+            console.error("⚠️ CRITICAL: Still using 'example@gmail.com'! Please save .env and restart terminal.");
+            return;
+          }
+          console.log(`📡 Attempting to send mail using: ${process.env.SMTP_USER}`);
           const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
+            service: "gmail",
             auth: {
               user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS,
+              pass: process.env.SMTP_PASS?.replace(/\s/g, ""),
             },
           });
 
           await transporter.sendMail({
-            from: "Hireheaven <no-reply>",
+            from: `"Hireheaven" <${process.env.SMTP_USER}>`,
             to,
             subject,
             html,
           });
 
-          console.log(`Mail has been sent to ${to}`);
+          console.log(`✅ Mail has been sent successfully to ${to}`);
         } catch (error) {
-          console.log("Failed to send mail", error);
+          console.error("❌ Failed to send mail:", error);
         }
       },
     });
   } catch (error) {
-    console.log("failed to start kafka consumer", error);
+    console.error("❌ Failed to start kafka consumer:", error);
   }
 };

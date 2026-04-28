@@ -1,9 +1,29 @@
 import { ArrowRight, Briefcase, Search, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import axios from "axios";
+import { job_service } from "@/lib/constants";
 
 const Hero = () => {
+  const [stats, setStats] = useState({
+    activeJobs: 0,
+    companies: 0,
+    jobSeekers: 0,
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const { data } = await axios.get(`${job_service}/api/job/stats`);
+        setStats(data);
+      } catch (error) {
+        console.log("Error fetching stats:", error);
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-secondary">
       <div className="absolute inset-0 opacity-5">
@@ -40,15 +60,21 @@ const Hero = () => {
             {/* stats */}
             <div className="flex flex-wrap justify-center md:justify-start gap-8 py-4">
               <div className="text-center md:text-left">
-                <p className="text-3xl font-bold text-blue-600">10k+</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {stats.activeJobs}
+                </p>
                 <p className="text-sm opacity-70">Active Jobs</p>
               </div>
               <div className="text-center md:text-left">
-                <p className="text-3xl font-bold text-blue-600">5k+</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {stats.companies}
+                </p>
                 <p className="text-sm opacity-70">Companies</p>
               </div>
               <div className="text-center md:text-left">
-                <p className="text-3xl font-bold text-blue-600">50k+</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {stats.jobSeekers}
+                </p>
                 <p className="text-sm opacity-70">Job Seekers</p>
               </div>
             </div>
@@ -96,9 +122,9 @@ const Hero = () => {
 
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-background">
                 <img
-                  src="/hero.jpeg"
+                  src="https://th.bing.com/th/id/OIG2.v9DxBvEv1g28o67xeA8H?pid=ImgGn"
                   className="object-cover object-center w-full h-full transform transition-transform duration-500 group-hover:scale-105"
-                  alt=""
+                  alt="HireHeaven Hero"
                 />
               </div>
             </div>

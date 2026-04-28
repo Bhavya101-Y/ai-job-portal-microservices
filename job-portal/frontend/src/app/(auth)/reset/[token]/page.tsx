@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { auth_service, useAppData } from "@/context/AppContext";
+import { useAppData } from "@/context/AppContext";
+import { auth_service } from "@/lib/constants";
 import axios from "axios";
 import Link from "next/link";
 import { redirect, useParams } from "next/navigation";
@@ -31,7 +32,7 @@ const ResetPage = () => {
       toast.success(data.message);
       setPassword("");
     } catch (error: any) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Failed to reset password");
     } finally {
       setbtnLoading(false);
     }

@@ -7,6 +7,7 @@ import Skills from "./components/skills";
 import Company from "./components/company";
 import { useRouter } from "next/navigation";
 import AppliedJobs from "./components/appliedJobs";
+import MyJobs from "./components/myJobs";
 
 const AccountPage = () => {
   const { isAuth, user, loading, applications } = useAppData();
@@ -32,6 +33,7 @@ const AccountPage = () => {
             <AppliedJobs applications={applications} />
           )}
           {user.role === "recruiter" && <Company />}
+          {user.role === "recruiter" && <MyJobs />}
         </div>
       )}
     </>

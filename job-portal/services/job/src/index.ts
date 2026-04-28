@@ -19,7 +19,14 @@ async function initDB() {
         CREATE TYPE work_location AS ENUM ('On-site', 'Remote', 'Hybrid');
         END IF;
         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'application_status') THEN 
-        CREATE TYPE application_status AS ENUM ('Submitted', 'Rejected', 'Hired');
+        CREATE TYPE application_status AS ENUM ('Submitted', 'Rejected', 'Hired', 'Interview');
+        ELSE
+            -- Try to add 'Interview' if it doesn't exist in the enum
+            BEGIN
+                ALTER TYPE application_status ADD VALUE 'Interview';
+            EXCEPTION
+                WHEN duplicate_object THEN NULL;
+            END;
         END IF;
     END$$;
     `;
@@ -62,11 +69,34 @@ async function initDB() {
     applicant_id INTEGER NOT NULL,
     applicant_email VARCHAR(255) NOT NULL,
     status application_status NOT NULL DEFAULT 'Submitted',
+    message TEXT,
     resume VARCHAR(255) NOT NULL,
     applied_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     subscribed BOOLEAN,
     UNIQUE (job_id, applicant_id)
     )
+    `;
+
+    await sql`
+    CREATE TABLE IF NOT EXISTS notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+    `;
+
+    // Add message column if it doesn't exist
+    await sql`
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='message') THEN
+            ALTER TABLE applications ADD COLUMN message TEXT;
+        END IF;
+
+        
+    END$$;
     `;
 
     console.log(
