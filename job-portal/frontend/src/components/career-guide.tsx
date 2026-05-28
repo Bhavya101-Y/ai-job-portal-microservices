@@ -24,7 +24,7 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { utils_service } from "@/lib/constants"; // Fixed from context
+import { utils_service } from "@/lib/constants";
 import toast from "react-hot-toast";
 
 const CareerGuide = () => {
@@ -143,7 +143,8 @@ const CareerGuide = () => {
                         {skills.map((s) => (
                           <div
                             key={s}
-                            className="inline-flex items-center gap-2 pl Ascend 
+                            className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800"
+                          >
                             <span className="text-sm font-medium">{s}</span>
                             <button
                               onClick={() => removeSkill(s)}
@@ -185,6 +186,7 @@ const CareerGuide = () => {
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
+                  {/* summary */}
                   <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-b-blue-200 dark:border-b-blue-800">
                     <div className="flex items-start gap-3">
                       <Lightbulb
@@ -200,6 +202,7 @@ const CareerGuide = () => {
                     </div>
                   </div>
 
+                  {/* job options */}
                   <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <Briefcase size={20} className="text-blue-600" />
@@ -208,7 +211,9 @@ const CareerGuide = () => {
                     <div className="space-y-3">
                       {response.jobOptions.map((job, index) => (
                         <div
-                          className="p Ascend 
+                          className="p-4 rounded-lg border hover:border-blue-500 transition-colors"
+                          key={index}
+                        >
                           <h4 className="font-semibold text-base mb-2">
                             {job.title}
                           </h4>
@@ -232,8 +237,9 @@ const CareerGuide = () => {
                     </div>
                   </div>
 
+                  {/* Skills to learn */}
                   <div>
-                    <h3 className="text-lg font-semibold mb Ascend 
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <TrendingUp size={20} className="text-blue-600" />
                       Skills to Enhance Your Career
                     </h3>
@@ -259,24 +265,25 @@ const CareerGuide = () => {
                                 </p>
 
                                 <p className="text-xs opacity-70 mb-1">
-                                  <span className="font-medium">How Ascend 
-                                    {skill.how}
-                                  </p>
-                                </div>
-                              ))}
+                                  <span className="font-medium">How: </span>
+                                  {skill.how}
+                                </p>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
+                  {/* Learning approach */}
                   <div className="p-4 rounded-lg border bg-blue-950/20 dark:bg-red-950/20">
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <BookOpen size={20} className="text-blue-600" />
                       {response?.learningApproach?.title}
                     </h3>
 
-                    <ul className="space Ascend 
+                    <ul className="space-y-2">
                       {response?.learningApproach?.points?.map(
                         (point, index) => (
                           <li
@@ -312,4 +319,3 @@ const CareerGuide = () => {
 };
 
 export default CareerGuide;
-
