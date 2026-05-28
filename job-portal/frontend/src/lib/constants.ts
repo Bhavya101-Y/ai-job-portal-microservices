@@ -1,7 +1,7 @@
 "use client";
 
-export const utils_service = "http://localhost:5001";
-export const auth_service = "http://localhost:5000";
-export const user_service = "http://localhost:5002";
-export const job_service = "http://localhost:5003";
-export const payment_service = "http://localhost:5004";
+export const utils_service = "https://utils-service-onmy.onrender.com";
+export const auth_service = "https://auth-service-wocd.onrender.com";
+export const user_service = "https://user-service-olp9.onrender.com";
+export const job_service = "https://job-service-eo8l.onrender.com";
+export const payment_service = "https://payment-service-c6m4.onrender.com";
