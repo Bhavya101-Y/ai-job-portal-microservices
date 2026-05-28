@@ -1,0 +1,108 @@
+services:
+  # Auth Service
+  - type: web
+    name: auth-service
+    env: node
+    plan: free
+    rootDir: job-portal/services/auth
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: UPLOAD_SERVICE
+        sync: false
+      - key: JWT_SEC
+        sync: false
+      - key: Kafka_Broker
+        sync: false
+      - key: Frontend_Url
+        sync: false
+      - key: Redis_url
+        sync: false
+
+  # Utils Service
+  - type: web
+    name: utils-service
+    env: node
+    plan: free
+    rootDir: job-portal/services/utils
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: CLOUD_NAME
+        sync: false
+      - key: API_KEY
+        sync: false
+      - key: API_SECRET
+        sync: false
+      - key: Kafka_Broker
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: API_KEY_GEMINI
+        sync: false
+
+  # User Service
+  - type: web
+    name: user-service
+    env: node
+    plan: free
+    rootDir: job-portal/services/user
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5002
+      - key: DATABASE_URL
+        sync: false
+      - key: UPLOAD_SERVICE
+        sync: false
+      - key: JWT_SEC
+        sync: false
+
+  # Job Service
+  - type: web
+    name: job-service
+    env: node
+    plan: free
+    rootDir: job-portal/services/job
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5003
+      - key: DB_URL
+        sync: false
+      - key: UPLOAD_SERVICE
+        sync: false
+      - key: JWT_SEC
+        sync: false
+      - key: Kafka_Broker
+        sync: false
+
+  # Payment Service
+  - type: web
+    name: payment-service
+    env: node
+    plan: free
+    rootDir: job-portal/services/payment
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5004
+      - key: Razorpay_Key
+        sync: false
+      - key: Razorpay_Secret
+        sync: false
+      - key: DB_URL
+        sync: false
+      - key: JWT_SEC
+        sync: false
