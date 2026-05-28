@@ -144,6 +144,7 @@ export interface Application {
   job_title: string;
   job_salary: number;
   job_location: string;
+  message?: string;
 }
 
 export interface AppNotification {
