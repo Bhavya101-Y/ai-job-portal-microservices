@@ -86,7 +86,7 @@ export interface AppContextType {
   applyJob: (job_id: number) => Promise<void>;
   applications: Application[];
   fetchApplications: () => Promise<void>;
-  notifications: Notification[];
+  notifications: AppNotification[];
   fetchNotifications: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
 }
@@ -130,7 +130,7 @@ export interface Company {
   jobs?: Job[];
 }
 
-type ApplicationStatus = "Submitted" | "Rejected" | "Hired";
+type ApplicationStatus = "Submitted" | "Rejected" | "Hired" | "Interview";
 
 export interface Application {
   application_id: number;
@@ -146,7 +146,7 @@ export interface Application {
   job_location: string;
 }
 
-export interface Notification {
+export interface AppNotification {
   notification_id: number;
   user_id: number;
   message: string;

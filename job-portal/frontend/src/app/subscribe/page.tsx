@@ -37,7 +37,7 @@ const SubscriptionPage = () => {
     );
 
     const options = {
-      key: "rzp_test_RaL8PDo9YBejEW", // Replace with your Razorpay key_id
+      key: "rzp_test_Suff1XAlKPd7E0", // Replace with your Razorpay key_id
       amount: order.id, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       currency: "INR",
       name: "Hire Heaven",

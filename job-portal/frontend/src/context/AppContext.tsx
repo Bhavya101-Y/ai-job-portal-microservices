@@ -1,6 +1,6 @@
 "use client";
 
-import { AppContextType, Application, AppProviderProps, User } from "@/type";
+import { AppContextType, Application, AppNotification, AppProviderProps, User } from "@/type";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Cookies from "js-cookie";
@@ -192,7 +192,7 @@ const token = Cookies.get("token") || "";
     }
   }
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
  
   async function fetchNotifications() {
     try {
