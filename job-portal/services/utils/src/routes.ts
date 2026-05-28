@@ -1,6 +1,7 @@
 import express from "express";
 import cloudinary from "cloudinary";
 import { GoogleGenAI } from "@google/genai";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -189,6 +190,40 @@ Focus on: File format and structure compatibility, proper use of standard sectio
     }
 
     res.json(jsonResponse);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ─── Direct Email Sender (HTTP Fallback) ──────────────────────────────────────
+router.post("/send-mail", async (req, res) => {
+  try {
+    const { to, subject, html } = req.body;
+
+    if (!to || !subject || !html) {
+      return res.status(400).json({ message: "to, subject, and html are required" });
+    }
+
+    if (process.env.SMTP_USER === "example@gmail.com") {
+      return res.status(400).json({ message: "SMTP_USER is not configured" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS?.replace(/\s/g, ""),
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Hireheaven" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html,
+    });
+
+    res.json({ message: "Mail sent successfully" });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

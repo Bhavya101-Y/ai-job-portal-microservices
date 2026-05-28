@@ -1,4 +1,5 @@
 import { Kafka, Producer, Admin } from "kafkajs";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -57,7 +58,18 @@ export const connectKafka = async () => {
 
 export const publishToTopic = async (topic: string, message: any) => {
   if (!producer) {
-    console.log("kafka producer is not initialized");
+    console.log("⚠️ Kafka producer is not initialized. Falling back to direct HTTP mail send...");
+    try {
+      const uploadServiceUrl = process.env.UPLOAD_SERVICE;
+      if (uploadServiceUrl) {
+        await axios.post(`${uploadServiceUrl}/api/utils/send-mail`, message);
+        console.log("✅ Mail sent directly via HTTP fallback successfully");
+      } else {
+        console.log("❌ Cannot fallback to HTTP mail send: UPLOAD_SERVICE is not defined");
+      }
+    } catch (error: any) {
+      console.error("❌ Failed to send mail directly via HTTP fallback:", error.message);
+    }
     return;
   }
 
