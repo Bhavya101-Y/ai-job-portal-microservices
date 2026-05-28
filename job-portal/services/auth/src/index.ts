@@ -1,9 +1,9 @@
-import app from "./app.ts";
+import app from "./app.js";
 import dotenv from "dotenv";
 import { sql } from "./utils/db.js";
 import { createClient } from "redis";
 
-import { connectKafka } from "./producer.ts";
+import { connectKafka } from "./producer.js";
 
 dotenv.config();
 
@@ -14,7 +14,6 @@ export const redisClient = createClient({
   socket: {
     tls: true,
     rejectUnauthorized: false,
-    family: 4,
     reconnectStrategy: (retries) => Math.min(retries * 500, 5000),
   },
   pingInterval: 15000,
