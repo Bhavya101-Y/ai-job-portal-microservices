@@ -13,10 +13,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: UPLOAD_SERVICE
-        fromService:
-          type: web
-          name: utils-service
-          property: url
+        sync: false
       - key: JWT_SEC
         sync: false
       - key: Kafka_Broker
@@ -66,10 +63,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: UPLOAD_SERVICE
-        fromService:
-          type: web
-          name: utils-service
-          property: url
+        sync: false
       - key: JWT_SEC
         sync: false
 
@@ -87,10 +81,7 @@ services:
       - key: DB_URL
         sync: false
       - key: UPLOAD_SERVICE
-        fromService:
-          type: web
-          name: utils-service
-          property: url
+        sync: false
       - key: JWT_SEC
         sync: false
       - key: Kafka_Broker
