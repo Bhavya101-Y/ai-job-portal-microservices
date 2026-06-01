@@ -181,7 +181,31 @@ router.post("/send-mail", async (req, res) => {
         if (!to || !subject || !html) {
             return res.status(400).json({ message: "to, subject, and html are required" });
         }
-        if (process.env.SMTP_USER === "example@gmail.com") {
+        // ─── Try Resend API if configured ───
+        if (process.env.RESEND_API_KEY) {
+            try {
+                const axios = (await import("axios")).default;
+                await axios.post("https://api.resend.com/emails", {
+                    from: "HireHeaven <onboarding@resend.dev>",
+                    to: [to],
+                    subject: subject,
+                    html: html,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                console.log("✅ Email sent successfully via Resend API");
+                return res.json({ message: "Mail sent successfully via Resend API" });
+            }
+            catch (resendError) {
+                console.error("❌ Resend API failed:", resendError?.response?.data || resendError.message);
+                // Fallback to SMTP if Resend fails
+            }
+        }
+        // ─── NodeMailer SMTP Fallback ───
+        if (!process.env.SMTP_USER || process.env.SMTP_USER === "example@gmail.com") {
             return res.status(400).json({ message: "SMTP_USER is not configured" });
         }
         const transporter = nodemailer.createTransport({
@@ -197,7 +221,7 @@ router.post("/send-mail", async (req, res) => {
             subject,
             html,
         });
-        res.json({ message: "Mail sent successfully" });
+        res.json({ message: "Mail sent successfully via SMTP" });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
