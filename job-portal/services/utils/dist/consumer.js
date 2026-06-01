@@ -4,10 +4,19 @@ import dotenv from "dotenv";
 dotenv.config();
 export const startSendMailConsumer = async () => {
     try {
-        const kafka = new Kafka({
+        const kafkaConfig = {
             clientId: "mail-service",
             brokers: [process.env.Kafka_Broker || "localhost:9092"],
-        });
+        };
+        if (process.env.KAFKA_USERNAME && process.env.KAFKA_PASSWORD) {
+            kafkaConfig.ssl = true;
+            kafkaConfig.sasl = {
+                mechanism: "scram-sha-256",
+                username: process.env.KAFKA_USERNAME,
+                password: process.env.KAFKA_PASSWORD,
+            };
+        }
+        const kafka = new Kafka(kafkaConfig);
         const consumer = kafka.consumer({ groupId: "mail-service-group" });
         await consumer.connect();
         const topicName = "send-mail";
@@ -17,30 +26,33 @@ export const startSendMailConsumer = async () => {
             eachMessage: async ({ topic, partition, message }) => {
                 try {
                     const { to, subject, html } = JSON.parse(message.value?.toString() || "{}");
+                    if (process.env.SMTP_USER === "example@gmail.com") {
+                        console.error("⚠️ CRITICAL: Still using 'example@gmail.com'! Please save .env and restart terminal.");
+                        return;
+                    }
+                    console.log(`📡 Attempting to send mail using: ${process.env.SMTP_USER}`);
                     const transporter = nodemailer.createTransport({
-                        host: "smtp.gmail.com",
-                        port: 465,
-                        secure: true,
+                        service: "gmail",
                         auth: {
                             user: process.env.SMTP_USER,
-                            pass: process.env.SMTP_PASS,
+                            pass: process.env.SMTP_PASS?.replace(/\s/g, ""),
                         },
                     });
                     await transporter.sendMail({
-                        from: "Hireheaven <no-reply>",
+                        from: `"Hireheaven" <${process.env.SMTP_USER}>`,
                         to,
                         subject,
                         html,
                     });
-                    console.log(`Mail has been sent to ${to}`);
+                    console.log(`✅ Mail has been sent successfully to ${to}`);
                 }
                 catch (error) {
-                    console.log("Failed to send mail", error);
+                    console.error("❌ Failed to send mail:", error);
                 }
             },
         });
     }
     catch (error) {
-        console.log("failed to start kafka consumer", error);
+        console.error("❌ Failed to start kafka consumer:", error);
     }
 };

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var auth_js_1 = require("../controllers/auth.js");
+var multer_js_1 = require("../middleware/multer.js");
+var router = express_1.default.Router();
+router.post("/register", multer_js_1.default, auth_js_1.registerUser);
+router.post("/login", auth_js_1.loginUser);
+router.post("/forgot", auth_js_1.forgotPassword);
+router.post("/reset/:token", auth_js_1.resetPassword);
+exports.default = router;

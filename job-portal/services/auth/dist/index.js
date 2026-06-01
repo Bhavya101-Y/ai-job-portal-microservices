@@ -2,14 +2,36 @@ import app from "./app.js";
 import dotenv from "dotenv";
 import { sql } from "./utils/db.js";
 import { createClient } from "redis";
+import { connectKafka } from "./producer.js";
 dotenv.config();
+connectKafka();
 export const redisClient = createClient({
     url: process.env.Redis_url,
+    socket: {
+        tls: true,
+        rejectUnauthorized: false,
+        reconnectStrategy: (retries) => Math.min(retries * 500, 5000),
+    },
+    pingInterval: 15000,
 });
-redisClient
-    .connect()
-    .then(() => console.log("connected to redis"))
-    .catch(console.error);
+redisClient.on("error", (err) => {
+    if (err.code === "ECONNRESET") {
+        console.warn("⚠️ Redis Connection Reset (Recovering...)");
+    }
+    else {
+        console.error("❌ Redis Client Error:", err);
+    }
+});
+async function connectRedis() {
+    try {
+        await redisClient.connect();
+        console.log("✅ Connected to Redis");
+    }
+    catch (err) {
+        console.error("❌ Failed to connect to Redis:", err);
+    }
+}
+connectRedis();
 async function initDb() {
     try {
         await sql `

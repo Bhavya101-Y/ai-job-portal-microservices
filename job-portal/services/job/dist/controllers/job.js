@@ -61,7 +61,7 @@ export const createJob = TryCatch(async (req, res) => {
         throw new ErrorHandler(401, "Authentication required");
     }
     if (user.role !== "recruiter") {
-        throw new ErrorHandler(403, "Forbidden: Only recruiter can create a company");
+        throw new ErrorHandler(403, "Forbidden: Only recruiter can post a job");
     }
     const { title, description, salary, location, role, job_type, work_location, company_id, openings, } = req.body;
     if (!title || !description || !salary || !location || !role || !openings) {
@@ -83,7 +83,7 @@ export const updateJob = TryCatch(async (req, res) => {
         throw new ErrorHandler(401, "Authentication required");
     }
     if (user.role !== "recruiter") {
-        throw new ErrorHandler(403, "Forbidden: Only recruiter can create a company");
+        throw new ErrorHandler(403, "Forbidden: Only recruiter can update a job");
     }
     const { title, description, salary, location, role, job_type, work_location, company_id, openings, is_active, } = req.body;
     const [existingJob] = await sql `SELECT posted_by_recuriter_id FROM jobs WHERE job_id = ${req.params.jobId}`;
@@ -210,6 +210,10 @@ export const updateApplication = TryCatch(async (req, res) => {
     }
     const { status, message: recruiterMessage } = req.body;
     const [updatedApplication] = await sql `UPDATE applications SET status = ${status}, message = ${recruiterMessage} WHERE application_id = ${id} RETURNING *`;
+    const notificationMessage = `Your application for "${job.title}" has been updated to: ${status}`;
+    console.log(`📡 Inserting notification for User ID: ${application.applicant_id}, Message: ${notificationMessage}`);
+    await sql `INSERT INTO notifications (user_id, message) VALUES (${application.applicant_id}, ${notificationMessage})`;
+    console.log(`✅ Notification successfully inserted in DB for user ${application.applicant_id}`);
     const message = {
         to: application.applicant_email,
         subject: `Job Application Update: ${status} - HireHeaven`,
@@ -222,5 +226,15 @@ export const updateApplication = TryCatch(async (req, res) => {
         message: "Application updated",
         job,
         updatedApplication,
+    });
+});
+export const getStats = TryCatch(async (req, res) => {
+    const [jobCount] = await sql `SELECT COUNT(*) FROM jobs WHERE is_active = true`;
+    const [companyCount] = await sql `SELECT COUNT(*) FROM companies`;
+    const [userCount] = await sql `SELECT COUNT(*) FROM users WHERE role = 'jobseeker'`;
+    res.json({
+        activeJobs: jobCount.count,
+        companies: companyCount.count,
+        jobSeekers: userCount.count,
     });
 });

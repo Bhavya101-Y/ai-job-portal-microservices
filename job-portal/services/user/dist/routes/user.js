@@ -1,6 +1,6 @@
 import express from "express";
 import { isAuth } from "../middlewares/auth.js";
-import { addSkillToUser, applyForJob, deleteSkillFromUser, getAllaplications, getUserProfile, myProfile, updateProfilePic, updateResume, updateUserProfile, } from "../controllers/user.js";
+import { addSkillToUser, applyForJob, deleteSkillFromUser, getAllApplications, getNotifications, getUserProfile, markNotificationAsRead, myProfile, updateProfilePic, updateResume, updateUserProfile, } from "../controllers/user.js";
 import uploadFile from "../middlewares/multer.js";
 const router = express.Router();
 router.get("/me", isAuth, myProfile);
@@ -11,5 +11,7 @@ router.put("/update/resume", isAuth, uploadFile, updateResume);
 router.post("/skill/add", isAuth, addSkillToUser);
 router.put("/skill/delete", isAuth, deleteSkillFromUser);
 router.post("/apply/job", isAuth, applyForJob);
-router.get("/application/all", isAuth, getAllaplications);
+router.get("/application/all", isAuth, getAllApplications);
+router.get("/notification/all", isAuth, getNotifications);
+router.put("/notification/:id", isAuth, markNotificationAsRead);
 export default router;

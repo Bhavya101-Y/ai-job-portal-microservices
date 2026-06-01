@@ -5,7 +5,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { TryCatch } from "../utils/TryCatch.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { forgotPasswordTemplate } from "../templete.js";
+import { forgotPasswordTemplate, welcomeTemplate } from "../templete.js";
 import { publishToTopic } from "../producer.js";
 import { redisClient } from "../index.js";
 export const registerUser = TryCatch(async (req, res, next) => {
@@ -40,6 +40,14 @@ export const registerUser = TryCatch(async (req, res, next) => {
     }
     const token = jwt.sign({ id: registeredUser?.user_id }, process.env.JWT_SEC, {
         expiresIn: "15d",
+    });
+    const message = {
+        to: email,
+        subject: "Welcome to Hireheaven - Registration Successful",
+        html: welcomeTemplate(name, role),
+    };
+    publishToTopic("send-mail", message).catch((error) => {
+        console.error("failed to send registration email", error);
     });
     res.json({
         message: "user Registered",

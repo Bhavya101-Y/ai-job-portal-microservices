@@ -70,6 +70,15 @@ async function initDB() {
     UNIQUE (job_id, applicant_id)
     )
     `;
+        await sql `
+    CREATE TABLE IF NOT EXISTS notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+    `;
         // Add message column if it doesn't exist
         await sql `
     DO $$

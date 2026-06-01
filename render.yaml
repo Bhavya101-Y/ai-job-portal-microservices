@@ -5,7 +5,7 @@ services:
     env: node
     plan: free
     rootDir: job-portal/services/auth
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: PORT
@@ -29,7 +29,7 @@ services:
     env: node
     plan: free
     rootDir: job-portal/services/utils
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: PORT
@@ -55,7 +55,7 @@ services:
     env: node
     plan: free
     rootDir: job-portal/services/user
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: PORT
@@ -73,7 +73,7 @@ services:
     env: node
     plan: free
     rootDir: job-portal/services/job
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: PORT
@@ -93,7 +93,7 @@ services:
     env: node
     plan: free
     rootDir: job-portal/services/payment
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: PORT

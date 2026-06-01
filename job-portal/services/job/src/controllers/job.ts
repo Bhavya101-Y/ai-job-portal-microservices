@@ -108,7 +108,7 @@ export const createJob = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (user.role !== "recruiter") {
     throw new ErrorHandler(
       403,
-      "Forbidden: Only recruiter can create a company"
+      "Forbidden: Only recruiter can post a job"
     );
   }
 
@@ -154,7 +154,7 @@ export const updateJob = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (user.role !== "recruiter") {
     throw new ErrorHandler(
       403,
-      "Forbidden: Only recruiter can create a company"
+      "Forbidden: Only recruiter can update a job"
     );
   }
 

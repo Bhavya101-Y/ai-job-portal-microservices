@@ -1,16 +1,28 @@
 import { Kafka } from "kafkajs";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 let producer;
 let admin;
 export const connectKafka = async () => {
     try {
-        const kafka = new Kafka({
+        const kafkaConfig = {
             clientId: "auth-service",
             brokers: [process.env.Kafka_Broker || "localhost:9092"],
-        });
+        };
+        if (process.env.KAFKA_USERNAME && process.env.KAFKA_PASSWORD) {
+            kafkaConfig.ssl = true;
+            kafkaConfig.sasl = {
+                mechanism: "scram-sha-256",
+                username: process.env.KAFKA_USERNAME,
+                password: process.env.KAFKA_PASSWORD,
+            };
+        }
+        const kafka = new Kafka(kafkaConfig);
+        console.log("⏳ Connecting to Kafka at:", process.env.Kafka_Broker || "localhost:9092");
         admin = kafka.admin();
         await admin.connect();
+        console.log("✅ Admin connected to Kafka");
         const topics = await admin.listTopics();
         if (!topics.includes("send-mail")) {
             await admin.createTopics({
@@ -27,15 +39,28 @@ export const connectKafka = async () => {
         await admin.disconnect();
         producer = kafka.producer();
         await producer.connect();
-        console.log("✅ connected to kafka producer");
+        console.log("✅ Kafka Producer connected successfully");
     }
     catch (error) {
-        console.log("Failed to connect to kafka", error);
+        console.error("❌ Failed to connect to Kafka:", error);
     }
 };
 export const publishToTopic = async (topic, message) => {
     if (!producer) {
-        console.log("kafka producer is not initialized");
+        console.log("⚠️ Kafka producer is not initialized. Falling back to direct HTTP mail send...");
+        try {
+            const uploadServiceUrl = process.env.UPLOAD_SERVICE;
+            if (uploadServiceUrl) {
+                await axios.post(`${uploadServiceUrl}/api/utils/send-mail`, message);
+                console.log("✅ Mail sent directly via HTTP fallback successfully");
+            }
+            else {
+                console.log("❌ Cannot fallback to HTTP mail send: UPLOAD_SERVICE is not defined");
+            }
+        }
+        catch (error) {
+            console.error("❌ Failed to send mail directly via HTTP fallback:", error.message);
+        }
         return;
     }
     try {
