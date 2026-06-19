@@ -86,8 +86,10 @@ Other Tools & Technologies
   -Docker (Containerization)
 
 
-  ⭐ Support
+
+ # ⭐ Support
 If you like this project, consider giving it a star on GitHub.
+
 
 Made by Bhavya
 
