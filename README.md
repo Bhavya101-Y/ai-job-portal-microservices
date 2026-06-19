@@ -13,7 +13,7 @@
 
 A highly scalable, production-ready **AI-Powered Job Portal Web Application** built using a **Microservices Architecture**. The platform features advanced developer-centric solutions such as an **AI Resume Analyzer (ATS Scoring)**, **AI Career Guidance System**, recruitment pipeline tracking, premium candidate subscription tiers via **Razorpay**, high-speed database caching with **Redis**, and async mail services routed via **Apache Kafka**.
 
-Developed with ❤️ by **[Bhavya](https://github.com/Bhavya101-Y)**.
+Developed by **[Bhavya](https://github.com/Bhavya101-Y)**.
 
 ---
 
