@@ -237,6 +237,10 @@ EXPOSE 5000
 CMD ["npm", "start"]
 ```
 
+## ⭐ Support
+If you like this project, consider giving it a star on GitHub!
+
+
 ### Deploying to Render
 This project is configured for automated builds and deployment on **Render** via the root [render.yaml](file:///c:/Users/Bhavy/Microservice_Job_Portal/render.yaml) blueprint file. Simply connect this repository to Render, apply the blueprint, and it will provision all 5 services automatically with their respective root folders and environment configurations.
 
